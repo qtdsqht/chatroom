@@ -98,6 +98,12 @@ build CMakeFiles/server.dir/wrap.c.o: C_COMPILER__server_Debug /home/qht/CLionPr
   OBJECT_DIR = CMakeFiles/server.dir
   OBJECT_FILE_DIR = CMakeFiles/server.dir
 
+build CMakeFiles/server.dir/process_message.c.o: C_COMPILER__server_Debug /home/qht/CLionProjects/chat/process_message.c || cmake_object_order_depends_target_server
+  DEP_FILE = CMakeFiles/server.dir/process_message.c.o.d
+  FLAGS = -g -std=gnu99
+  OBJECT_DIR = CMakeFiles/server.dir
+  OBJECT_FILE_DIR = CMakeFiles/server.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target server
@@ -106,7 +112,7 @@ build CMakeFiles/server.dir/wrap.c.o: C_COMPILER__server_Debug /home/qht/CLionPr
 #############################################
 # Link the executable server
 
-build server: C_EXECUTABLE_LINKER__server_Debug CMakeFiles/server.dir/select_server.c.o CMakeFiles/server.dir/wrap.c.o
+build server: C_EXECUTABLE_LINKER__server_Debug CMakeFiles/server.dir/select_server.c.o CMakeFiles/server.dir/wrap.c.o CMakeFiles/server.dir/process_message.c.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/server.dir
   POST_BUILD = :
