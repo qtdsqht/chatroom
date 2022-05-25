@@ -45,9 +45,9 @@ order_t process_cmd(const char *cmd)
     }else if (strcmp(cmd, "/login") == 0)
     {
         return LOGIN;
-    }else if (strcmp(cmd, "/online") == 0)
+    }else if (strcmp(cmd, "/list") == 0)
     {
-        return ONLINE;
+        return LIST;
     }else if (strcmp(cmd, "/whisper") == 0)
     {
         return WHISPER;
@@ -60,27 +60,65 @@ order_t process_cmd(const char *cmd)
 
 regstat_t reg(const char *username, const char *password)
 {
-    FILE *user_table;
+    FILE *fp;
     char buf[MAXLINE];
 
-    if((user_table = fopen("/home/qht/CLionProjects/mychat/user_table.txt", "a+")) == NULL)
+    if((fp = fopen("/home/qht/CLionProjects/mychat/user_table.txt", "a+")) == NULL)
     {
-        perror("error open file /user_table");
+        perror("error open file /fp");
         exit(1);
     }
 
-    while(fgets(buf, MAXLINE, user_table) != NULL)
+    while(fgets(buf, MAXLINE, fp) != NULL)
     {
         if(strstr(buf, username) != NULL)
         {
-            fclose(user_table);
+            fclose(fp);
             return REG_FAILED;
         }
     }
-    fputc('\n', user_table);
-    fputs(username,user_table);
-    fputc(':', user_table);
-    fputs(password, user_table);
-    fclose(user_table);
+    fputc('\n', fp);
+    fputs(username, fp);
+    fputc(':', fp);
+    fputs(password, fp);
+    fclose(fp);
     return REG_SUCCESS;
+}
+
+loginstat_t login(const char *username, const char *password, char *online_client)
+{
+    FILE *fp;
+    char buf[MAXLINE];
+    char db_username[MAXLINE];
+    char db_password[MAXLINE];
+
+    if(online_client[0] != '\0')
+    {
+        return LOGIN_ISLOGIN;
+    }
+
+    if((fp = fopen("/home/qht/CLionProjects/mychat/user_table.txt", "a+")) == NULL)
+    {
+        perror("error open file /fp");
+        exit(1);
+    }
+
+    while(fgets(buf, MAXLINE, fp) != NULL)
+    {
+        strcpy(db_username, strtok(buf, ":"));
+        strcpy(db_password, strtok(NULL, "\n"));
+        if (strcmp(username, db_username) == 0 && strcmp(password, db_password) == 0)
+        {
+            strcpy(online_client, username);
+            fclose(fp);
+            return LOGIN_SUCCESS;
+        }else if (strcmp(username, db_username) == 0 && strcmp(password, db_password) != 0)
+        {
+            fclose(fp);
+            return LOGIN_WRONGPW;
+        }
+    }
+
+    fclose(fp);
+    return LOGIN_UNREG;
 }

@@ -6,42 +6,49 @@
 #include <stdlib.h>
 #include "chatmacro.h"
 
-regstat_t reg(const char *username, const char *password)
+loginstat_t login(const char *username, const char *password, char *online_client)
 {
-    FILE *user_table;
+    FILE *fp;
     char buf[MAXLINE];
+    char db_username[MAXLINE];
+    char db_password[MAXLINE];
 
-    if((user_table = fopen("/home/qht/CLionProjects/mychat/user_table.txt", "a+")) == NULL)
+    if((fp = fopen("/home/qht/CLionProjects/mychat/user_table.txt", "a+")) == NULL)
     {
-        perror("error open file /user_table");
+        perror("error open file /fp");
         exit(1);
     }
 
-    while(fgets(buf, MAXLINE, user_table) != NULL)
+    while(fgets(buf, MAXLINE, fp) != NULL)
     {
-        if(strstr(buf, username) != NULL)
+        strcpy(db_username, strtok(buf, ":"));
+        strcpy(db_password, strtok(NULL, "\n"));
+        if (strcmp(username, db_username) == 0 && strcmp(password, db_password) == 0)
         {
-            fclose(user_table);
-            return REG_FAILED;
+            strcpy(online_client, username);
+            fclose(fp);
+            return LOGIN_SUCCESS;
+        }else if (strcmp(username, db_username) == 0 && strcmp(password, db_password) != 0)
+        {
+            fclose(fp);
+            return LOGIN_WRONGPW;
         }
     }
-    fputc('\n', user_table);
-    fputs(username,user_table);
-    fputc(':', user_table);
-    fputs(password, user_table);
-    fclose(user_table);
-    return REG_SUCCESS;
-}
 
+    fclose(fp);
+    return LOGIN_UNREG;
+}
 
 int main()
 {
     char username[MAXLINE];
     char password[MAXLINE];
+    char online[MAXLINE];
 
     scanf("%s", username);
     scanf("%s", password);
 
-    printf("%d",reg(username, password));
+    printf("%d\n",login(username, password, online));
+    printf("%s", online);
     return 0;
 }

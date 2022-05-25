@@ -23,6 +23,10 @@ int main(int argc, char **argv)
 	struct sockaddr_in	cliaddr, servaddr;
     char msg[MAXARG][MAXLINE];
     int msgn;
+    order_t cmd;
+    char online_client[FD_SETSIZE][MAXLINE];
+    loginstat_t loginstat;
+
 
 	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
@@ -41,6 +45,8 @@ int main(int argc, char **argv)
 		client[i] = -1;	/* -1 indicates available entry */
 	FD_ZERO(&allset);
 	FD_SET(listenfd, &allset);
+
+    memset(online_client, 0, sizeof(online_client));
 
 	for ( ; ; ) 
 	{
@@ -96,8 +102,9 @@ int main(int argc, char **argv)
 				} else 
 				{
                     msgn = split_msg(buf, msg);
+                    cmd = process_cmd(msg[0]);
 
-                    if(process_cmd(msg[0]) == REG)
+                    if(cmd == REG)
                     {
                         if(reg(msg[1], msg[2]) == REG_SUCCESS)
                         {
@@ -106,6 +113,41 @@ int main(int argc, char **argv)
                         {
                             Write(sockfd, "Username has already exist!\n", 28);
                         }
+                    } else if (cmd == LOGIN)
+                    {
+                        loginstat = login(msg[1], msg[2], online_client[i]);
+                        if (loginstat == LOGIN_SUCCESS)
+                        {
+                            Write(sockfd, "login success!\n", 15);
+                        }else if (loginstat == LOGIN_WRONGPW)
+                        {
+                            Write(sockfd, "wrong password!\n", 16);
+                        }else if (loginstat == LOGIN_UNREG)
+                        {
+                            Write(sockfd, "username doesn't exist!\n", 24);
+                        }else
+                        {
+                            Write(sockfd, "already login!\n", 15);
+                        }
+                    } else if (cmd == LIST)
+                    {
+                        int j;
+                        int nword;
+
+                        Write(sockfd, "online user:", 12);
+                        for(j = 0; j < FD_SETSIZE; j++)
+                        {
+                            nword = (int)strlen(online_client[j]);
+                            if(nword != 0)
+                            {
+                                Write(sockfd, online_client[j], nword);
+                                Write(sockfd, " ", 1);
+                            }
+                        }
+                        Write(sockfd, "\n", 1);
+                    }else
+                    {
+                        Write(sockfd, "wtf", 3);
                     }
 				}
 
