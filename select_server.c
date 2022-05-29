@@ -99,8 +99,10 @@ int main(int argc, char **argv)
 					Close(sockfd);
 					FD_CLR(sockfd, &allset);
 					client[i] = -1;
+                    memset(online_client[i], '\0', sizeof(online_client[i]));
 				} else 
 				{
+                    memset(msg, '\0', sizeof(msg));
                     msgn = split_msg(buf, msg);
                     cmd = process_cmd(msg[0]);
 
@@ -147,7 +149,7 @@ int main(int argc, char **argv)
                         Write(sockfd, "\n", 1);
                     }else
                     {
-                        Write(sockfd, "wtf", 3);
+                        //Write(sockfd, "wtf", 3);
                     }
 				}
 
